@@ -47,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
         mPokemonAdapter = new PokemonAdapter(dummyResult, new PokemonAdapter.OnPokemonClickListener() {
             @Override
             public void onPokemonClick(Result pokemonFromList) {
-                mMainPresenter.startDetailsActivity(pokemonFromList);
+                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+                intent.putExtra(MainPresenter.POKEMON_FROM_LIST, pokemonFromList);
+                startActivity(intent);
             }
         });
 
@@ -58,9 +60,14 @@ public class MainActivity extends AppCompatActivity {
         mMainPresenter.loadPokemonList(0);
     }
 
-    public void displayPokemonList(List<Result> pokemonLists) {
+    /*
+    * Display Pokemon List in RecyclerView
+    *
+    * @param pokemonList List of Pokemon read from API
+    */
+    public void displayPokemonList(List<Result> pokemonList) {
         mPokemonAdapter.clear();
-        mPokemonAdapter.addAll(pokemonLists);
+        mPokemonAdapter.addAll(pokemonList);
         mPokemonAdapter.notifyDataSetChanged();
     }
 

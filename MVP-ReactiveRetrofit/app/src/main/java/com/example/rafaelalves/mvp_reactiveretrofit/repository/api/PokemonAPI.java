@@ -9,6 +9,9 @@ public class PokemonAPI {
     private static final String SERVER_URL = "http://pokeapi.co/api/v2/";
     IPokemonAPI mPokemonAPI;
 
+    /*
+    * Retrofit Constructor for API calls
+    */
     public PokemonAPI() {
         Retrofit retrofit = new Retrofit.Builder()
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
