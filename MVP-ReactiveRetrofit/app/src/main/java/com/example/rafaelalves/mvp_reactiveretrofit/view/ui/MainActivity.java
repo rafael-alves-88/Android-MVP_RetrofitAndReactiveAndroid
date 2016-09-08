@@ -10,9 +10,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.example.rafaelalves.mvp_reactiveretrofit.R;
+import com.example.rafaelalves.mvp_reactiveretrofit.model.PokemonList;
 import com.example.rafaelalves.mvp_reactiveretrofit.model.Result;
 import com.example.rafaelalves.mvp_reactiveretrofit.presenter.MainPresenter;
 import com.example.rafaelalves.mvp_reactiveretrofit.view.adapters.PokemonAdapter;
@@ -28,8 +28,13 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.rvPokemonList) RecyclerView rvPokemonList;
     @Bind(R.id.rlLoading) RelativeLayout rlLoading;
+    @Bind(R.id.rlSmallLoading) RelativeLayout rlSmallLoading;
     private PokemonAdapter mPokemonAdapter;
     private MainPresenter mMainPresenter;
+    private LinearLayoutManager mLinearLayoutManager;
+
+    public boolean isFirstLoad = true;
+    private int mNextOffset = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // Layout Manager
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        rvPokemonList.setLayoutManager(linearLayoutManager);
+        mLinearLayoutManager = new LinearLayoutManager(this);
+        rvPokemonList.setLayoutManager(mLinearLayoutManager);
 
         // Adapter
         List<Result> dummyResult = new ArrayList<>();
@@ -55,9 +60,34 @@ public class MainActivity extends AppCompatActivity {
 
         rvPokemonList.setAdapter(mPokemonAdapter);
 
+        // ScrollListener to Trigger Infinite Loading
+        setOnScrollListener();
+
         // Presenter
         mMainPresenter = new MainPresenter(this);
-        mMainPresenter.loadPokemonList(0);
+        mMainPresenter.loadPokemonList(mNextOffset);
+    }
+
+    /*
+    * Sets OnScrollListener for RecyclerView, so infinite loading can be handled
+    */
+    private void setOnScrollListener() {
+        rvPokemonList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if ((mNextOffset > -1) && (dy > 0)) {
+                    int visibleItemCount = mLinearLayoutManager.getChildCount();
+                    int totalItemCount = mLinearLayoutManager.getItemCount();
+                    int pastVisibleItems = mLinearLayoutManager.findFirstVisibleItemPosition();
+
+                    if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
+                        mMainPresenter.loadPokemonList(mNextOffset);
+                    }
+                }
+            }
+        });
     }
 
     /*
@@ -65,18 +95,42 @@ public class MainActivity extends AppCompatActivity {
     *
     * @param pokemonList List of Pokemon read from API
     */
-    public void displayPokemonList(List<Result> pokemonList) {
-        mPokemonAdapter.clear();
-        mPokemonAdapter.addAll(pokemonList);
+    public void displayPokemonList(PokemonList pokemonList) {
+        mPokemonAdapter.addAll(pokemonList.results);
         mPokemonAdapter.notifyDataSetChanged();
+
+        getNextOffset(pokemonList.next);
+    }
+
+    /*
+    * Get next page to load on inifinite loading
+    *
+    * @param next URL provided from API. Property Next from Object PokemonList
+    */
+    private void getNextOffset(String next) {
+        if (next != null && next.length() > 0) {
+            String[] array = next.split("offset=");
+            mNextOffset = Integer.parseInt(array[array.length - 1]);
+        } else {
+            mNextOffset = -1;
+        }
     }
 
     public void showLoading() {
-        rlLoading.setVisibility(View.VISIBLE);
+        if (isFirstLoad) {
+            rlLoading.setVisibility(View.VISIBLE);
+        } else {
+            rlSmallLoading.setVisibility(View.VISIBLE);
+        }
     }
 
     public void hideLoading() {
-        rlLoading.setVisibility(View.GONE);
+        if (isFirstLoad) {
+            rlLoading.setVisibility(View.GONE);
+            isFirstLoad = false;
+        } else {
+            rlSmallLoading.setVisibility(View.GONE);
+        }
     }
 
     @Override

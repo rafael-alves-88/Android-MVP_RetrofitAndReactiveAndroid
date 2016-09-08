@@ -20,6 +20,12 @@
 
     </android.support.v7.widget.RecyclerView>
 
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        layout="@layout/loading_small" />
+
     <include layout="@layout/loading" />
 
 </RelativeLayout>

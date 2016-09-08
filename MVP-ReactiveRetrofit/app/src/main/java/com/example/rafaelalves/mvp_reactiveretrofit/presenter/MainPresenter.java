@@ -53,7 +53,7 @@ public class MainPresenter {
 
                     @Override
                     public void onNext(PokemonList pokemonList) {
-                        mView.displayPokemonList(pokemonList.results);
+                        mView.displayPokemonList(pokemonList);
                     }
                 });
     }

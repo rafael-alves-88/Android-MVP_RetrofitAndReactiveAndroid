@@ -51,7 +51,11 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.PokemonA
     }
 
     public void addAll(List<Result> newPokemonList) {
-        this.mPokemonList = newPokemonList;
+        if (this.mPokemonList == null) {
+            this.mPokemonList = newPokemonList;
+        } else {
+            this.mPokemonList.addAll(newPokemonList);
+        }
     }
 
     public static class PokemonAdapterViewHolder extends RecyclerView.ViewHolder {
