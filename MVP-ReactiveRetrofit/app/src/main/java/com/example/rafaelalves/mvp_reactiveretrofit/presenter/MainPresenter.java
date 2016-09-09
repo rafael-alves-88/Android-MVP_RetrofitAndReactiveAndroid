@@ -8,7 +8,7 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-/*
+/**
 * Presenter for View MainActivity
 */
 public class MainPresenter {
@@ -18,20 +18,20 @@ public class MainPresenter {
     private MainActivity mView;
     private PokemonAPI mPokemon;
 
-    /*
+    /**
     * Class constructor
     *
-    * @param activity MainActivity
+    * @param activity - MainActivity
     */
     public MainPresenter(MainActivity activity) {
         mView = activity;
         mPokemon = new PokemonAPI();
     }
 
-    /*
+    /**
     * Load Pokemon List
     *
-    * @param offset Offset for starting Pokemon at page
+    * @param offset - Offset for starting Pokemon at page
     */
     public void loadPokemonList(int offset) {
         mView.showLoading();

@@ -12,6 +12,9 @@ import com.example.rafaelalves.mvp_reactiveretrofit.model.Result;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Adapter for PokemonList
+ */
 public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.PokemonAdapterViewHolder> {
 
     public List<Result> mPokemonList;
@@ -21,6 +24,11 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.PokemonA
         void onPokemonClick(Result pokemonFromList);
     }
 
+    /**
+     *
+     * @param pokemonList - List of Pokemon read from API
+     * @param listener - Event for Row Click on RecyclerView
+     */
     public PokemonAdapter(List<Result> pokemonList, OnPokemonClickListener listener) {
         this.mPokemonList = pokemonList;
         this.listener = listener;

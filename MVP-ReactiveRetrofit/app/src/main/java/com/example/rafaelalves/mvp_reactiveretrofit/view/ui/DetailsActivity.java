@@ -50,20 +50,20 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
-    /*
+    /**
     * Set Pokemon Details to View
     *
-    * @param Pokemon Object from API
+    * @param Pokemon - Object from API
     */
     public void setPokemonDetails(Pokemon pokemon) {
         tvName.setText(pokemon.name);
         tvWeight.setText(pokemon.weight.toString());
     }
 
-    /*
+    /**
     * Set Pokemon Sprite to View
     *
-    * @param Pokemon Sprite URL from API
+    * @param spriteURL - Sprite URL from API
     */
     public void setPokemonSprite(String spriteURL) {
         Picasso.with(this)
@@ -73,7 +73,7 @@ public class DetailsActivity extends AppCompatActivity {
                 .into(ivSprite);
     }
 
-    /*
+    /**
     * Set Pokemon Sprite Error to View, if Retrofit cannot read from API
     */
     public void setPokemonSpriteError() {

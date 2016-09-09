@@ -15,7 +15,7 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-/*
+/**
 * Presenter for View DetailsActivity
 */
 public class DetailsPresenter {
@@ -23,20 +23,20 @@ public class DetailsPresenter {
     private DetailsActivity mView;
     private PokemonAPI mPokemon;
 
-    /*
+    /**
     * Class constructor
     *
-    * @param activity DetailsActivity
+    * @param activity - DetailsActivity
     */
     public DetailsPresenter(DetailsActivity activity) {
         mView = activity;
         mPokemon = new PokemonAPI();
     }
 
-    /*
+    /**
     * Load Pokemon Details and Sprites
     *
-    * @param bundle Bundle containing a serialized Result object
+    * @param bundle - Bundle containing a serialized Result object
     */
     public void loadPokemonDetails(Bundle bundle) {
         Result pokemonFromList = (Result) bundle.getSerializable(MainPresenter.POKEMON_FROM_LIST);

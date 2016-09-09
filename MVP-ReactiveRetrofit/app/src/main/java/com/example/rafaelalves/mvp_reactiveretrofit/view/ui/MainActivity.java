@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         mMainPresenter.loadPokemonList(mNextOffset);
     }
 
-    /*
+    /**
     * Sets OnScrollListener for RecyclerView, so infinite loading can be handled
     */
     private void setOnScrollListener() {
@@ -90,10 +90,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /*
+    /**
     * Display Pokemon List in RecyclerView
     *
-    * @param pokemonList List of Pokemon read from API
+    * @param pokemonList - List of Pokemon read from API
     */
     public void displayPokemonList(PokemonList pokemonList) {
         mPokemonAdapter.addAll(pokemonList.results);
@@ -102,10 +102,10 @@ public class MainActivity extends AppCompatActivity {
         getNextOffset(pokemonList.next);
     }
 
-    /*
+    /**
     * Get next page to load on inifinite loading
     *
-    * @param next URL provided from API. Property Next from Object PokemonList
+    * @param next - URL provided from API. Property Next from Object PokemonList
     */
     private void getNextOffset(String next) {
         if (next != null && next.length() > 0) {
