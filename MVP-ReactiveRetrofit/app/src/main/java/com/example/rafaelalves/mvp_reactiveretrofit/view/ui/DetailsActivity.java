@@ -53,7 +53,7 @@ public class DetailsActivity extends AppCompatActivity {
     /**
     * Set Pokemon Details to View
     *
-    * @param Pokemon - Object from API
+    * @param pokemon - Object from API
     */
     public void setPokemonDetails(Pokemon pokemon) {
         tvName.setText(pokemon.name);
