@@ -2,7 +2,7 @@ package com.example.rafaelalves.mvp_reactiveretrofit.presenter;
 
 import com.example.rafaelalves.mvp_reactiveretrofit.model.PokemonList;
 import com.example.rafaelalves.mvp_reactiveretrofit.repository.api.PokemonAPI;
-import com.example.rafaelalves.mvp_reactiveretrofit.view.ui.MainActivity;
+import com.example.rafaelalves.mvp_reactiveretrofit.repository.listeners.PokemonListListener;
 
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
@@ -15,26 +15,23 @@ public class MainPresenter {
 
     public static final String POKEMON_FROM_LIST = "PokemonFromList";
 
-    private MainActivity mView;
     private PokemonAPI mPokemon;
 
     /**
-    * Class constructor
-    *
-    * @param activity - MainActivity
+     * Class constructor
     */
-    public MainPresenter(MainActivity activity) {
-        mView = activity;
+    public MainPresenter() {
         mPokemon = new PokemonAPI();
     }
 
     /**
-    * Load Pokemon List
-    *
-    * @param offset - Offset for starting Pokemon at page
+     * Load Pokemon List
+     *
+     * @param offset - Offset for starting Pokemon at page
+     * @param listener - PokemonListListener to handle Callbacks
     */
-    public void loadPokemonList(int offset) {
-        mView.showLoading();
+    public void loadPokemonList(int offset, final PokemonListListener listener) {
+        listener.onRequestStart();
 
         mPokemon.getPokemonAPI()
                 .getPokemonList(offset)
@@ -43,17 +40,18 @@ public class MainPresenter {
                 .subscribe(new Observer<PokemonList>() {
                     @Override
                     public void onCompleted() {
-                        mView.hideLoading();
+                        listener.onRequestFinish();
                     }
 
                     @Override
                     public void onError(Throwable e) {
-
+                        listener.onRequestFinish();
+                        listener.onError(e);
                     }
 
                     @Override
                     public void onNext(PokemonList pokemonList) {
-                        mView.displayPokemonList(pokemonList);
+                        listener.onPokemonListLoad(pokemonList);
                     }
                 });
     }

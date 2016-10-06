@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,7 @@ import com.example.rafaelalves.mvp_reactiveretrofit.R;
 import com.example.rafaelalves.mvp_reactiveretrofit.model.PokemonList;
 import com.example.rafaelalves.mvp_reactiveretrofit.model.Result;
 import com.example.rafaelalves.mvp_reactiveretrofit.presenter.MainPresenter;
+import com.example.rafaelalves.mvp_reactiveretrofit.repository.listeners.PokemonListListener;
 import com.example.rafaelalves.mvp_reactiveretrofit.view.adapters.PokemonAdapter;
 
 import java.util.ArrayList;
@@ -25,23 +27,32 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
+    //region [ ButterKnife ]
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.rvPokemonList) RecyclerView rvPokemonList;
     @Bind(R.id.rlLoading) RelativeLayout rlLoading;
     @Bind(R.id.rlSmallLoading) RelativeLayout rlSmallLoading;
+    //endregion
+
+    //region [ Private Members ]
+    private final String TAG = MainActivity.class.getSimpleName();
     private PokemonAdapter mPokemonAdapter;
     private MainPresenter mMainPresenter;
     private LinearLayoutManager mLinearLayoutManager;
-
-    public boolean isFirstLoad = true;
     private int mNextOffset = 0;
+    private boolean isFirstLoad = true;
+    //endregion
 
+    //region [ LifeCycle ]
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
+
+        // Presenter
+        mMainPresenter = new MainPresenter();
 
         // Layout Manager
         mLinearLayoutManager = new LinearLayoutManager(this);
@@ -63,9 +74,53 @@ public class MainActivity extends AppCompatActivity {
         // ScrollListener to Trigger Infinite Loading
         setOnScrollListener();
 
-        // Presenter
-        mMainPresenter = new MainPresenter(this);
-        mMainPresenter.loadPokemonList(mNextOffset);
+        // Loads Pokemon List
+        getPokemonList();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+    //endregion
+
+    //region [ Private Methods ]
+    private void getPokemonList() {
+        mMainPresenter.loadPokemonList(mNextOffset, new PokemonListListener() {
+            @Override
+            public void onPokemonListLoad(PokemonList pokemonList) {
+                displayPokemonList(pokemonList);
+            }
+
+            @Override
+            public void onRequestStart() {
+                showLoading();
+            }
+
+            @Override
+            public void onRequestFinish() {
+                hideLoading();
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Log.e(TAG, throwable.getMessage());
+                hideLoading();
+            }
+        });
     }
 
     /**
@@ -83,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
                     int pastVisibleItems = mLinearLayoutManager.findFirstVisibleItemPosition();
 
                     if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
-                        mMainPresenter.loadPokemonList(mNextOffset);
+                        getPokemonList();
                     }
                 }
             }
@@ -95,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
     *
     * @param pokemonList - List of Pokemon read from API
     */
-    public void displayPokemonList(PokemonList pokemonList) {
+    private void displayPokemonList(PokemonList pokemonList) {
         mPokemonAdapter.addAll(pokemonList.results);
         mPokemonAdapter.notifyDataSetChanged();
 
@@ -116,7 +171,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void showLoading() {
+    /**
+     * Shows loading screen, if it' the first time it shows a fullScreen loading
+     */
+    private void showLoading() {
         if (isFirstLoad) {
             rlLoading.setVisibility(View.VISIBLE);
         } else {
@@ -124,7 +182,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void hideLoading() {
+    /**
+     * Hides loading screen
+     */
+    private void hideLoading() {
         if (isFirstLoad) {
             rlLoading.setVisibility(View.GONE);
             isFirstLoad = false;
@@ -132,22 +193,5 @@ public class MainActivity extends AppCompatActivity {
             rlSmallLoading.setVisibility(View.GONE);
         }
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+    //endregion
 }

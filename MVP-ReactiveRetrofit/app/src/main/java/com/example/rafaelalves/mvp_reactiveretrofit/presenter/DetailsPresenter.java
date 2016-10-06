@@ -1,15 +1,10 @@
 package com.example.rafaelalves.mvp_reactiveretrofit.presenter;
 
-import android.os.Bundle;
-import android.support.v7.view.menu.MenuView;
-import android.util.Log;
-import android.widget.Toast;
-
 import com.example.rafaelalves.mvp_reactiveretrofit.model.Pokemon;
 import com.example.rafaelalves.mvp_reactiveretrofit.model.PokemonForm;
-import com.example.rafaelalves.mvp_reactiveretrofit.model.Result;
 import com.example.rafaelalves.mvp_reactiveretrofit.repository.api.PokemonAPI;
-import com.example.rafaelalves.mvp_reactiveretrofit.view.ui.DetailsActivity;
+import com.example.rafaelalves.mvp_reactiveretrofit.repository.listeners.PokemonDetailsListener;
+import com.example.rafaelalves.mvp_reactiveretrofit.repository.listeners.PokemonSpriteListener;
 
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
@@ -20,54 +15,58 @@ import rx.schedulers.Schedulers;
 */
 public class DetailsPresenter {
 
-    private DetailsActivity mView;
     private PokemonAPI mPokemon;
 
     /**
-    * Class constructor
-    *
-    * @param activity - DetailsActivity
+     * Class constructor
     */
-    public DetailsPresenter(DetailsActivity activity) {
-        mView = activity;
+    public DetailsPresenter() {
         mPokemon = new PokemonAPI();
     }
 
     /**
-    * Load Pokemon Details and Sprites
-    *
-    * @param bundle - Bundle containing a serialized Result object
+     * Loads Pokemon Details and Sprites
+     *
+     * @param pokemonName - Pokemon name to get details
+     * @param listener - PokemonDetailsListener to handle Callbacks
     */
-    public void loadPokemonDetails(Bundle bundle) {
-        Result pokemonFromList = (Result) bundle.getSerializable(MainPresenter.POKEMON_FROM_LIST);
-
-        mView.showLoading();
+    public void loadPokemonDetails(String pokemonName, final PokemonDetailsListener listener) {
+        listener.onRequestStart();
 
         // Loads Details
         mPokemon.getPokemonAPI()
-                .getPokemon(pokemonFromList.name)
+                .getPokemon(pokemonName)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Pokemon>() {
                     @Override
                     public void onCompleted() {
-                        mView.hideLoading();
+                        listener.onRequestFinish();
                     }
 
                     @Override
                     public void onError(Throwable e) {
-
+                        listener.onError(e);
+                        listener.onRequestFinish();
                     }
 
                     @Override
                     public void onNext(Pokemon pokemon) {
-                        mView.setPokemonDetails(pokemon);
+                        listener.onPokemonDetailsLoad(pokemon);
                     }
                 });
+    }
 
-        // Loads Sprites
+    /**
+     * Loads Pokemon Sprite
+     *
+     * @param pokemonName - Pokemon name to get sprite
+     * @param listener - PokemonFormListener to handle Callbacks
+     */
+    public void loadPokemonSprite(String pokemonName, final PokemonSpriteListener listener) {
+        // Loads Sprite
         mPokemon.getPokemonAPI()
-                .getPokemonForm(pokemonFromList.name)
+                .getPokemonForm(pokemonName)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<PokemonForm>() {
@@ -78,12 +77,12 @@ public class DetailsPresenter {
 
                     @Override
                     public void onError(Throwable e) {
-                        mView.setPokemonSpriteError();
+                        listener.onError(e);
                     }
 
                     @Override
                     public void onNext(PokemonForm pokemonForm) {
-                        mView.setPokemonSprite(pokemonForm.sprites.frontDefault);
+                        listener.onPokemonFormLoad(pokemonForm.sprites.frontDefault);
                     }
                 });
     }
